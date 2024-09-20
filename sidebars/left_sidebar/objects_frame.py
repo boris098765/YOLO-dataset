@@ -4,10 +4,7 @@ from tkinter import ttk
 from CTkMessagebox import CTkMessagebox
 
 
-# TODO Нормальная сортировка
-# TODO Редактирование дочерних элементов
 # TODO Обработка удаления дочернего элемента
-
 
 class ObjectFrame(ctk.CTkFrame):
     def __init__(self, parent):
@@ -65,37 +62,19 @@ class ObjectFrame(ctk.CTkFrame):
         self.edit_btn.grid(row=1, column=1, padx=5, pady=5)
         self.del_btn.grid(row=1, column=2, padx=5, pady=5)
 
-    # Удаление из данных элемента по parent_id и id
-    def delete_data_by_id(self, parent_id, id):
-        self.data = [item for item in self.data if not (item[0] == parent_id and item[1] == id)]
-
-    # Удаление из данных элементов по parent_id
-    def delete_data_by_parent_id(self, parent_id):
-        self.data = [item for item in self.data if not (item[0] == parent_id)]
+    # TODO
+    def get_item_by_id(self, parent_id, id):
+        ...
 
     # Возвращает наследников из базы
     def get_children(self, parent_id=0):
         return [item for item in self.data if item[0]==parent_id]
 
-    # Получить порядковый номер элемента
-    def get_i_by_id(self, parent_id, id):
-        i = -1
-        n = 0
-        for item in self.data:
-            if item[0]==parent_id and item[1]==id: i = n
-            n+=1
-        return i
-
     # Удалить значение в БД вместе с дочерними
-    def delete_object(self, parent_id, obj_id):
-        if parent_id == 0:
-            self.delete_data_by_parent_id(obj_id)
-            self.delete_data_by_id(parent_id, obj_id)
-            return
-        i = self.get_i_by_id(0, parent_id)
-        if i != -1:
-            self.data[i] = (self.data[i][0], self.data[i][1], self.data[i][2], self.data[i][3] - 1)
-        self.delete_data_by_id(parent_id, obj_id)
+    def delete_object(self, parent_id, id):
+        self.data = [item for item in self.data if not (item[0]==parent_id and item[1]==id)]
+        if parent_id==0:
+            self.data = [item for item in self.data if not (item[0]==id)]
 
     def delete_items(self):
         selected_items = self.get_selected_row()
@@ -103,12 +82,13 @@ class ObjectFrame(ctk.CTkFrame):
             CTkMessagebox(self, icon="cancel", title="DELETE ERROR", message="Nothing to delete!!!")
             return
 
-        ids = [(self.table.item(item_id)['values'][0], self.table.item(item_id)['values'][1])
-               for item_id in selected_items]
+        ids = []
+        for item_id in selected_items:
+            row_values = self.table.item(item_id)['values']
+            if row_values: ids.append((row_values[0], row_values[1]))
 
-        for parent_id, obj_id in ids:
-            self.delete_object(parent_id, obj_id)
-
+        for parent_id, id in ids:
+            self.delete_object(parent_id, id)
         self.update_table()
 
     def update_table(self):
@@ -118,13 +98,17 @@ class ObjectFrame(ctk.CTkFrame):
 
         # Объекты
         parents = self.get_children(0)
+
         for el in parents:
             parent_id, point_count = el[1], el[3]
             parent_item = self.table.insert('', 'end', values=el)
-            # Добавляем дочерние элементы
-            children = self.get_children(parent_id)
-            for child in children:
-                self.table.insert(parent_item, 'end', values=child)
+            if point_count == 0:
+                continue
+
+            for i in range(point_count):
+                item_data = (parent_id, i+1, '', 0)
+                self.table.insert(parent_item, 'end', values=item_data)
+                self.data.append(item_data)
 
     def find_min_num(self):
         if len(self.data) == 0: return 1
@@ -152,6 +136,8 @@ class ObjectFrame(ctk.CTkFrame):
         return ids
 
     def edit_item(self):
+        poboch = False
+
         selected_items = self.get_selected_row()
         if not selected_items:
             CTkMessagebox(self, icon="cancel", title="EDIT ERROR", message="Nothing to edit!!!")
@@ -161,11 +147,11 @@ class ObjectFrame(ctk.CTkFrame):
             return
 
         selected_id = selected_items[0]
-        selected_values = self.table.item(selected_id)['values']
-        if not selected_values: return
+        row_values = self.table.item(selected_id)['values']
+        if not row_values: return
 
-        parent_id, obj_id = selected_values[:2]
-        poboch = parent_id != 0
+        if row_values[0] != 0:
+            poboch = True
 
         # Окно для редактирования
         edit_window = ctk.CTkToplevel(self)
@@ -177,38 +163,28 @@ class ObjectFrame(ctk.CTkFrame):
         ctk.CTkLabel(edit_window, text="№").grid(row=0, column=0, padx=5, pady=10)
         num_entry = ctk.CTkEntry(edit_window)
         num_entry.grid(row=0, column=1, padx=10, pady=10)
-        num_entry.insert(0, selected_values[1])
+        num_entry.insert(0, row_values[1])
 
         ctk.CTkLabel(edit_window, text="Name").grid(row=1, column=0, padx=5, pady=10)
         name_entry = ctk.CTkEntry(edit_window)
         name_entry.grid(row=1, column=1, padx=10, pady=10)
-        name_entry.insert(0, selected_values[2])
+        name_entry.insert(0, row_values[2])
 
         ctk.CTkLabel(edit_window, text="P Count").grid(row=2, column=0, padx=5, pady=10)
         count_entry = ctk.CTkEntry(edit_window)
         count_entry.grid(row=2, column=1, padx=5, pady=10)
-        count_entry.insert(0, selected_values[3])
+        count_entry.insert(0, row_values[3])
 
-        if poboch:
-            count_entry.configure(state='disabled')
+        if poboch: count_entry.configure(state='disabled')
 
         def save_edit():
             new_id = int(num_entry.get())
             new_name = name_entry.get()
             new_count = int(count_entry.get())
 
-            new_data = (parent_id, new_id, new_name, new_count)
-
             # Обновляем данные в таблице
-            data_id = self.get_i_by_id(parent_id, obj_id)
-            self.data[data_id] = new_data
-
-            # Если это родитель, обновляем количество дочерних элементов
-            if not poboch and new_count != selected_values[3]:
-                self.data = [item for item in self.data if item[0] != obj_id]  # Удаление старых детей
-                for i in range(new_count):
-                    self.data.append((obj_id, i+1, '', 0))  # Добавляем новые дочерние элементы
-
+            # 1. Получить ids элемента в базе
+            # 2. Записать новый элемент на место старого
             self.update_table()
             edit_window.destroy()
 
