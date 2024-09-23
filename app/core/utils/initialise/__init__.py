@@ -1,1 +1,2 @@
-from .main_variables_initialise import main_variables_initalise
+from .window_variables_initialise import window_variables_initialise
+from .path_variables_initialise import path_variables_initialise

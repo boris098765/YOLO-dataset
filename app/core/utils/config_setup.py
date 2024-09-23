@@ -25,8 +25,7 @@ class LoggingSettings(BaseModel):
         env_prefix = "LOGGING_"
 
 
-# Main settings
-class MainSettings(BaseModel):
+class PathSettings(BaseModel):
     data_path: SecretStr = SecretStr(config('DATA_PATH'))
 
     images_path: SecretStr = SecretStr(config('IMAGES_PATH'))
@@ -36,6 +35,20 @@ class MainSettings(BaseModel):
 
     models_path: SecretStr = SecretStr(config('MODELS_PATH'))
     my_models_path: SecretStr = SecretStr(config('MY_MODELS_PATH'))
+
+
+class WindowSettings(BaseModel):
+    appearance_mode: SecretStr = SecretStr(config('APPEARANCE_MODE'))
+    title: SecretStr = SecretStr(config('TITLE'))
+    size_x: SecretStr = SecretStr(config('SIZE_X'))
+    size_y: SecretStr = SecretStr(config('SIZE_Y'))
+
+
+# Main settings
+class MainSettings(BaseModel):
+
+    path_settings: PathSettings = PathSettings()
+    window_settings: WindowSettings = WindowSettings()
 
     # .env path
     class Config:

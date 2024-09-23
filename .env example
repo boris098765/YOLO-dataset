@@ -1,3 +1,5 @@
+# --- Path Settings ---
+
 # Root directory for all project data
 DATA_PATH = ""
 
@@ -10,3 +12,11 @@ DATASETS_PATH = ""
 # Directories for models
 MODELS_PATH = ""
 MY_MODELS_PATH = ""
+
+
+# --- Window Settings ---
+
+APPEARANCE_MODE = ""
+TITLE = ""
+SIZE_X = ""
+SIZE_Y = ""
