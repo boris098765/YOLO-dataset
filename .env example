@@ -1,0 +1,12 @@
+# Root directory for all project data
+DATA_PATH = ""
+
+# Subdirectories for specific types of data
+IMAGES_PATH = ""
+DETECT_IMAGES_PATH = ""
+POSE_IMAGES_PATH = ""
+DATASETS_PATH = ""
+
+# Directories for models
+MODELS_PATH = ""
+MY_MODELS_PATH = ""
