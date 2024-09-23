@@ -3,6 +3,10 @@ from tkinter import ttk
 
 from CTkMessagebox import CTkMessagebox
 
+pose_mode_cols     = ('c1', 'c2', 'c3', 'c4')
+pose_mode_headings = ('', '№', 'Name', 'P Count')
+pose_mode_widths   = (20, 20, 0, 60)
+
 
 class ObjectFrame(ctk.CTkFrame):
     def __init__(self, parent):
@@ -33,14 +37,11 @@ class ObjectFrame(ctk.CTkFrame):
         self.table = ttk.Treeview(self, columns=('c1', 'c2', 'c3', 'c4'), show='headings', height=15)
 
         # Настройка колонок
-        self.table.heading('c1')
-        self.table.heading('c2', text="№")
-        self.table.heading('c3', text="Name")
-        self.table.heading('c4', text="P Count")
-        self.table.column('c1', width=20, stretch=False)
-        self.table.column('c2', width=20, stretch=False)
-        self.table.column('c3', stretch=True)
-        self.table.column('c4', width=60, stretch=False)
+        for col, head, width in zip(pose_mode_cols, pose_mode_headings, pose_mode_widths):
+            self.table.heading(col, text=head)
+
+            if width != 0: self.table.column(col, width=width, stretch=False)
+            else: self.table.column(col, stretch=True)
 
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.table.yview)
         self.table.configure(yscrollcommand=self.scrollbar.set)
