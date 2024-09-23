@@ -4,25 +4,24 @@ from tkinter import ttk
 from CTkMessagebox import CTkMessagebox
 
 pose_mode_cols     = ('c1', 'c2', 'c3', 'c4')
-pose_mode_headings = ('', '№', 'Name', 'P Count')
-pose_mode_widths   = (20, 20, 0, 60)
+pose_mode_headings = ('', '№', 'Name', 'Count')
+pose_mode_widths   = (20, 30, 0, 40)
 
 
-class ObjectFrame(ctk.CTkFrame):
+class ClassesConfigFrame(ctk.CTkFrame):
     def __init__(self, parent):
-        # Формат данных:
-        # parent_id, id, name, count
         self.data = []
 
         self.table = None
-        self.scrollbar = None
 
         self.new_btn = None
         self.edit_btn = None
         self.del_btn = None
 
         super().__init__(parent)
+        self.setup_table()
 
+    def setup_table(self):
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
@@ -31,10 +30,7 @@ class ObjectFrame(ctk.CTkFrame):
         self.grid_columnconfigure(2, weight=1)
         self.grid_columnconfigure(3, weight=0)
 
-        self.setup_table()
-
-    def setup_table(self):
-        self.table = ttk.Treeview(self, columns=('c1', 'c2', 'c3', 'c4'), show='headings', height=15)
+        self.table = ttk.Treeview(self, columns=('c1', 'c2', 'c3', 'c4'), show='headings', height=10)
 
         # Настройка колонок
         for col, head, width in zip(pose_mode_cols, pose_mode_headings, pose_mode_widths):
@@ -43,18 +39,16 @@ class ObjectFrame(ctk.CTkFrame):
             if width != 0: self.table.column(col, width=width, stretch=False)
             else: self.table.column(col, stretch=True)
 
-        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.table.yview)
-        self.table.configure(yscrollcommand=self.scrollbar.set)
-
-        # Размещение таблицы и скроллбара
-        self.table.grid(row=0, column=0, columnspan=3, sticky='nsew')
-        self.scrollbar.grid(row=0, column=3, sticky='ns')
+        scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.table.yview)
+        self.table.configure(yscrollcommand=scrollbar.set)
 
         # Кнопки
         self.new_btn = ctk.CTkButton(self, text="New", command=self.new_item)
         self.edit_btn = ctk.CTkButton(self, text="Edit", command=self.edit_item)
         self.del_btn = ctk.CTkButton(self, text="Del", command=self.delete_items)
 
+        self.table.grid(row=0, column=0, columnspan=3, sticky='nsew')
+        scrollbar.grid(row=0, column=3, sticky='ns')
         self.new_btn.grid(row=1, column=0, padx=5, pady=5)
         self.edit_btn.grid(row=1, column=1, padx=5, pady=5)
         self.del_btn.grid(row=1, column=2, padx=5, pady=5)
@@ -76,6 +70,18 @@ class ObjectFrame(ctk.CTkFrame):
     def get_children(self, parent_id=0):
         return [item for item in self.data if item[0]==parent_id]
 
+    def find_min_num(self):
+        if len(self.data) == 0: return 1
+
+        parents = {item for item in self.data if item[0]==0}
+        occupied = {item[1] for item in parents}
+
+        first_available = 1
+        while first_available in occupied:
+            first_available += 1
+
+        return first_available
+
     # Удалить значение в БД вместе с дочерними
     def delete_object(self, parent_id, id):
         if parent_id == 0:
@@ -89,6 +95,16 @@ class ObjectFrame(ctk.CTkFrame):
             print('new item:', item)
             self.data[i] = tuple(item)
             self.delete_data_by_id(parent_id, id)
+
+
+    def get_selected_row(self):
+        selected_item = self.table.selection()
+        if not selected_item: return False
+
+        ids = []
+        for item_id in selected_item:
+            ids.append(item_id)
+        return ids
 
     def delete_items(self):
         selected_items = self.get_selected_row()
@@ -120,30 +136,10 @@ class ObjectFrame(ctk.CTkFrame):
             for child in children:
                 self.table.insert(parent_item, 'end', values=child)
 
-    def find_min_num(self):
-        if len(self.data) == 0: return 1
-
-        parents = {item for item in self.data if item[0]==0}
-        occupied = {item[1] for item in parents}
-
-        first_available = 1
-        while first_available in occupied:
-            first_available += 1
-
-        return first_available
-
     def new_item(self):
         self.data.append((0, self.find_min_num(), 'name', 0))
         self.update_table()
 
-    def get_selected_row(self):
-        selected_item = self.table.selection()
-        if not selected_item: return False
-
-        ids = []
-        for item_id in selected_item:
-            ids.append(item_id)
-        return ids
 
     def edit_item(self):
         selected_items = self.get_selected_row()
@@ -166,25 +162,24 @@ class ObjectFrame(ctk.CTkFrame):
         edit_window.geometry('300x200')
         edit_window.title("Edit Item")
 
-        edit_window.grid_columnconfigure(0, weight=1)
-
         ctk.CTkLabel(edit_window, text="№").grid(row=0, column=0, padx=5, pady=10)
-        num_entry = ctk.CTkEntry(edit_window)
-        num_entry.grid(row=0, column=1, padx=10, pady=10)
-        num_entry.insert(0, selected_values[1])
-
         ctk.CTkLabel(edit_window, text="Name").grid(row=1, column=0, padx=5, pady=10)
-        name_entry = ctk.CTkEntry(edit_window)
-        name_entry.grid(row=1, column=1, padx=10, pady=10)
-        name_entry.insert(0, selected_values[2])
-
         ctk.CTkLabel(edit_window, text="P Count").grid(row=2, column=0, padx=5, pady=10)
+
+        num_entry = ctk.CTkEntry(edit_window)
+        name_entry = ctk.CTkEntry(edit_window)
         count_entry = ctk.CTkEntry(edit_window)
+
+        num_entry.grid(row=0, column=1, padx=10, pady=10)
+        name_entry.grid(row=1, column=1, padx=10, pady=10)
         count_entry.grid(row=2, column=1, padx=5, pady=10)
+
+        num_entry.insert(0, selected_values[1])
+        name_entry.insert(0, selected_values[2])
         count_entry.insert(0, selected_values[3])
 
         if poboch:
-            count_entry.configure(state='disabled')
+            count_entry.configure(state='disabled', fg_color="#D3D3D3")
 
         def save_edit():
             new_id = int(num_entry.get())
@@ -208,7 +203,3 @@ class ObjectFrame(ctk.CTkFrame):
 
         save_btn = ctk.CTkButton(edit_window, text="Save", command=save_edit)
         save_btn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
-
-    def get_objects(self):
-        objects = [self.table.item(obj)['values'][1] for obj in self.table.get_children()]
-        return objects

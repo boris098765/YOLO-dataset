@@ -33,7 +33,9 @@ class CanvasArea(ctk.CTkFrame):
         load_image_btn.pack(pady=10)
 
     def load_image(self):
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp")]
+        )
         if file_path:
             self.image = Image.open(file_path)
             self.scale_factor = 1.0
