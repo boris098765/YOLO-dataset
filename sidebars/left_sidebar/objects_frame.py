@@ -4,12 +4,8 @@ from tkinter import ttk
 from CTkMessagebox import CTkMessagebox
 
 
-# TODO Обработка удаления дочернего элемента
-
 class ObjectFrame(ctk.CTkFrame):
     def __init__(self, parent):
-        self.sidebar = parent
-
         # Формат данных:
         # parent_id, id, name, count
         self.data = []

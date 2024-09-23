@@ -3,9 +3,6 @@ import customtkinter as ctk
 
 class ModelNameFrame(ctk.CTkFrame):
     def __init__(self, parent):
-        self.mode_menu = None
-        self.model_name = None
-
         super().__init__(parent)
 
         self.configure(fg_color="transparent")
