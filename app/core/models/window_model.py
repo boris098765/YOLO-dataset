@@ -29,8 +29,8 @@ class ImageEditorApp:
 
     def _initialize_components(self):
         self.left_sidebar = self._create_component("LeftSidebar")
-        self.canvas = self._create_component("CanvasArea")
         self.right_sidebar = self._create_component("RightSidebar")
+        self.canvas = self._create_component("CanvasArea")
 
         self._place_components()
 
@@ -41,8 +41,8 @@ class ImageEditorApp:
     def _place_components(self):
         components = [
             {'component': self.left_sidebar, 'row': 0, 'column': 0, 'sticky': 'ns', 'padx': 5, 'pady': 10},
-            {'component': self.canvas, 'row': 0, 'column': 1, 'sticky': 'nsew', 'padx': 5, 'pady': 10},
             {'component': self.right_sidebar, 'row': 0, 'column': 2, 'sticky': 'ns', 'padx': 5, 'pady': 10},
+            {'component': self.canvas, 'row': 0, 'column': 1, 'sticky': 'nsew', 'padx': 5, 'pady': 10},
         ]
 
         for component in components:
