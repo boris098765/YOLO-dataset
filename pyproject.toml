@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "yolo-dataset"
+version = "0.1.0"
+description = ""
+authors = ["D. Adamson 0xwebmilk@gmail.com"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+customtkinter = "5.2.2"
+pillow = "10.4.0"
+ctkmessagebox = "2.7"
+ctkmenubar = "0.8"
+pydantic = "^2.9.2"
+python-decouple = "^3.8"
+pydantic-settings = "^2.5.2"
+structlog = "^24.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
