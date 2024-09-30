@@ -6,4 +6,5 @@ Uses Custom Tkinter GUI
 Типы моделей: CLS, DETECT, POSE
 Версии моделей: в данный момент v8, однако позднее планируется несколько версий
 
-Принцип работы:
+Интерфейс
+![image](https://github.com/user-attachments/assets/0e84dd27-afc0-455f-9ae6-cf6ba087793c)
